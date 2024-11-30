@@ -3,7 +3,7 @@ import Workspace from "../models/workspace.js";
 import Task from "../models/Task.js";
 import Profile from "../models/Profile.js";
 import nodemailer from "nodemailer";
-import UserWorkspaces from "../models/userWorkSpaces.js";
+import UserWorkspaces from "../models/userWorkSpaces .js";
 import User from "../models/user.js";
 import dotenv from "dotenv";
 
@@ -138,6 +138,32 @@ const workspaceController = {
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
+
+  getAllUsersInWorkspace: async (req, res) => {
+    const { workspaceId } = req.query;
+
+    try {
+      const workspace = await Workspace.findByPk(workspaceId, {
+        include: {
+          model: User,
+          through: {
+            where: { isAccepted: true }, // Only accepted members
+          },
+          attributes: ["id", "username", "email"], // Select relevant fields
+        },
+      });
+
+      if (!workspace) {
+        return res.status(404).json({ message: "Workspace not found" });
+      }
+
+      res.json(workspace.Users);
+    } catch (error) {
+      res.status(500).json({ message: "Server error", error: error.message });
+    }
+
+
+  }
 };
 
 export default workspaceController;
