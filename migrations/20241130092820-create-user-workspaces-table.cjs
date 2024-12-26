@@ -31,6 +31,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true, // Optional: e.g., "admin" or "member"
       },
+      isAccepted: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false, // Invitations are not accepted by default
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

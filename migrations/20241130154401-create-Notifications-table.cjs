@@ -18,6 +18,15 @@ module.exports = {
         },
         onDelete: "CASCADE",
       },
+      workspaceId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Workspaces",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
       message: {
         type: Sequelize.TEXT,
         allowNull: false,
@@ -39,3 +48,6 @@ module.exports = {
     await queryInterface.dropTable("Notifications");
   },
 };
+
+
+

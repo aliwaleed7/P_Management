@@ -5,18 +5,26 @@ import userRoutes from "./route/userRoutes.js";
 import userProfile from "./route/profileRoutes.js";
 import workSpace from "./route/workspaceRoutes.js";
 import task from "./route/taskRoutes.js";
+import invite from "./route/inviteRoutes.js";
+import notification from "./route/notificationRoute.js";
 
 dotenv.config();
 
 const app = express();
 app.use(express.json());
 
-app.use(cors());
+const corsOptions = {
+  origin: "http://localhost:3000",
+};
+
+app.use(cors(corsOptions));
 
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/profile", userProfile);
 app.use("/api/workspace", workSpace);
 app.use("/api/task", task);
+app.use("/api/invite", invite);
+app.use("/api/notification", notification);
 
 export default app;

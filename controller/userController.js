@@ -61,21 +61,13 @@ const UserController = {
   logoutUser: async (req, res) => {
     // Extract token from headers
     const token = req.headers.authorization?.split(" ")[1];
-
-    try {
-      if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-      }
-
-      // Decode the token to get expiration date
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-      await Blacklist.create({
+    try {if (!token) {
+        return res.status(401).json({ message: "No token provided" }); }
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        await Blacklist.create({
         token,
-        expiresAt: new Date(decoded.exp * 1000), // decoded.exp is in seconds, so convert to milliseconds
-      });
-
-      res.status(200).json({ message: "Logged out successfully" });
+        expiresAt: new Date(decoded.exp * 1000), });
+        res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
       res.status(500).json({ message: "Server error", error: error.message });
     }
