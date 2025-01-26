@@ -7,6 +7,7 @@ import workSpace from "./route/workspaceRoutes.js";
 import task from "./route/taskRoutes.js";
 import invite from "./route/inviteRoutes.js";
 import notification from "./route/notificationRoute.js";
+import space from "./route/spaceRoutes.js"
 
 dotenv.config();
 
@@ -26,5 +27,6 @@ app.use("/api/workspace", workSpace);
 app.use("/api/task", task);
 app.use("/api/invite", invite);
 app.use("/api/notification", notification);
+app.use("/api/space", space);
 
 export default app;

@@ -1,14 +1,22 @@
-// migrations/20241106123457-create-task-table.js
 "use strict";
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("Tasks", {
+    await queryInterface.createTable("Subtasks", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
+      },
+      taskId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Tasks", // Subtasks are still linked to Tasks
+          key: "id",
+        },
+        onDelete: "CASCADE",
       },
       title: {
         type: Sequelize.STRING,
@@ -16,37 +24,30 @@ module.exports = {
       },
       description: {
         type: Sequelize.TEXT,
+        allowNull: true,
       },
       status: {
         type: Sequelize.STRING,
-        defaultValue: "Pending",
-      },
-      dueDate: {
-        type: Sequelize.DATE,
-      },
-      workspaceId: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: "Workspaces",
-          key: "id",
-        },
-        onDelete: "CASCADE",
         allowNull: false,
+      },
+      deadline: {
+        type: Sequelize.DATE,
+        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.fn("NOW"),
       },
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.NOW,
+        defaultValue: Sequelize.fn("NOW"),
       },
     });
   },
 
   down: async (queryInterface) => {
-    await queryInterface.dropTable("Tasks");
+    await queryInterface.dropTable("Subtasks");
   },
 };

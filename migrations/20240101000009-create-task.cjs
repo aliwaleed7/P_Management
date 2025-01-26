@@ -2,53 +2,50 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("subtasks", {
+    await queryInterface.createTable("Tasks", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      taskId: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Tasks",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      name: {
+      title: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       description: {
         type: Sequelize.TEXT,
-        allowNull: true,
       },
       status: {
         type: Sequelize.STRING,
-        allowNull: false,
-        defaultValue: "pending",
+        defaultValue: "Pending",
       },
-      deadline: {
+      dueDate: {
         type: Sequelize.DATE,
-        allowNull: true,
+      },
+      listId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "lists", // Updated to associate tasks with lists
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        allowNull: false,
       },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.fn("NOW"),
+        defaultValue: Sequelize.NOW,
       },
       updatedAt: {
         type: Sequelize.DATE,
         allowNull: false,
-        defaultValue: Sequelize.fn("NOW"),
+        defaultValue: Sequelize.NOW,
       },
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("subtasks");
+  down: async (queryInterface) => {
+    await queryInterface.dropTable("Tasks");
   },
 };

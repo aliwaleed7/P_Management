@@ -9,11 +9,11 @@ module.exports = {
         primaryKey: true,
         allowNull: false,
       },
-      projectId: {
+      list_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "projects",
+          model: "lists", // Ensure this matches the name of your 'Lists' table
           key: "id",
         },
         onDelete: "CASCADE",
@@ -22,16 +22,16 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      dueDate: {
+      due_date: {
         type: Sequelize.DATE,
         allowNull: false,
       },
-      createdAt: {
+      created_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn("NOW"),
       },
-      updatedAt: {
+      updated_at: {
         type: Sequelize.DATE,
         allowNull: false,
         defaultValue: Sequelize.fn("NOW"),

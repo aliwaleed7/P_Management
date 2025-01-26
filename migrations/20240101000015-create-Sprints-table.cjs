@@ -24,14 +24,6 @@
           type: Sequelize.DATE,
           allowNull: false,
         },
-        project_id: {
-          type: Sequelize.INTEGER,
-          references: {
-            model: "projects",
-            key: "id",
-          },
-          allowNull: false,
-        },
         workspace_id: {
           type: Sequelize.INTEGER,
           references: {
