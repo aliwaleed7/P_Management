@@ -18,7 +18,25 @@ module.exports = {
       },
       status: {
         type: Sequelize.STRING,
-        defaultValue: "Pending",
+        defaultValue: "To Do",
+      },
+      priority: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: "Low", // Default priority
+      },
+      estimatedTime: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      assigned_to: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "user_team_workspaces", // Assuming "users" table exists
+          key: "id",
+        },
+        onDelete: "SET NULL", // Task remains if user is deleted
+        allowNull: true,
       },
       dueDate: {
         type: Sequelize.DATE,
@@ -32,6 +50,27 @@ module.exports = {
         onDelete: "CASCADE",
         allowNull: false,
       },
+
+      milestoneId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "Timelines", // Updated to associate tasks with lists
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        allowNull: true,
+      },
+
+      sprintId: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "sprints", // Updated to associate tasks with lists
+          key: "id",
+        },
+        onDelete: "CASCADE",
+        allowNull: true,
+      },
+
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,

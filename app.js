@@ -8,6 +8,7 @@ import task from "./route/taskRoutes.js";
 import invite from "./route/inviteRoutes.js";
 import notification from "./route/notificationRoute.js";
 import space from "./route/spaceRoutes.js"
+import timeLog from "./route/timeLogRoute.js"
 
 dotenv.config();
 
@@ -28,5 +29,6 @@ app.use("/api/task", task);
 app.use("/api/invite", invite);
 app.use("/api/notification", notification);
 app.use("/api/space", space);
+app.use("/api/timelogs", timeLog);
 
 export default app;

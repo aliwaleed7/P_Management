@@ -2,34 +2,50 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("dependencies", {
+    await queryInterface.createTable("user_team_workspaces", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      taskId: {
+      user_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Tasks",
+          model: "Users",
           key: "id",
         },
         onDelete: "CASCADE",
       },
-      dependentOnTaskId: {
+      workspace_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Tasks",
+          model: "Workspaces",
           key: "id",
         },
         onDelete: "CASCADE",
       },
-      dependencyType: {
+
+      team_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "teams",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+
+      role: {
         type: Sequelize.STRING,
+        allowNull: true, // Optional: e.g., "admin" or "member"
+      },
+      isAccepted: {
+        type: Sequelize.BOOLEAN,
         allowNull: false,
+        defaultValue: false, // Invitations are not accepted by default
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -45,6 +61,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("dependencies");
+    await queryInterface.dropTable("user_team_workspaces");
   },
 };

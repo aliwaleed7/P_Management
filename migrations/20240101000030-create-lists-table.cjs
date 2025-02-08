@@ -12,6 +12,10 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false,
       },
+      progress: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+      },
       space_id: {
         type: Sequelize.INTEGER,
         references: {
@@ -20,6 +24,16 @@ module.exports = {
         },
         allowNull: true, // This can be null, meaning the list may not be associated with a space
       },
+
+      team_id: {
+        type: Sequelize.INTEGER,
+        references: {
+          model: "teams", // The referenced table
+          key: "id", // The primary key of the referenced table
+        },
+        allowNull: true, // This can be null, meaning the list may not be associated with a space
+      },
+
       folder_id: {
         type: Sequelize.INTEGER,
         references: {

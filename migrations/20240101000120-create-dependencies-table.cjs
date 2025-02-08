@@ -2,51 +2,55 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("projects", {
+    await queryInterface.createTable("dependencies", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      name: {
+      taskId: {
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: "Tasks",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+
+      subtask_id: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "subtasks",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+
+      dependentOnTaskId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "Tasks",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+
+      dependentOnSubTaskId: {
+        type: Sequelize.INTEGER,
+        allowNull: true,
+        references: {
+          model: "subtasks",
+          key: "id",
+        },
+        onDelete: "CASCADE",
+      },
+      dependencyType: {
         type: Sequelize.STRING,
         allowNull: false,
-      },
-      description: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      workspace_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "Workspaces",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      created_by_user_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "user_workspaces",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      team_id: {
-        type: Sequelize.INTEGER,
-        allowNull: true,
-        references: {
-          model: "teams",
-          key: "id",
-        },
-        onDelete: "SET NULL",
-      },
-      deadline: {
-        type: Sequelize.DATE,
-        allowNull: true,
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -62,6 +66,6 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("projects");
+    await queryInterface.dropTable("dependencies");
   },
 };

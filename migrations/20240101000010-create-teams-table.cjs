@@ -2,35 +2,25 @@
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    await queryInterface.createTable("user_team", {
+    await queryInterface.createTable("teams", {
       id: {
         type: Sequelize.INTEGER,
         autoIncrement: true,
         primaryKey: true,
         allowNull: false,
       },
-      user_id: {
+      team_name: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      workspace_id: {
         type: Sequelize.INTEGER,
         allowNull: false,
         references: {
-          model: "Users",
+          model: "Workspaces", 
           key: "id",
         },
         onDelete: "CASCADE",
-      },
-      team_id: {
-        type: Sequelize.INTEGER,
-        allowNull: false,
-        references: {
-          model: "teams",
-          key: "id",
-        },
-        onDelete: "CASCADE",
-      },
-      joined_at: {
-        type: Sequelize.DATE,
-        allowNull: false,
-        defaultValue: Sequelize.fn("NOW"),
       },
       createdAt: {
         type: Sequelize.DATE,
@@ -45,7 +35,7 @@ module.exports = {
     });
   },
 
-  down: async (queryInterface, Sequelize) => {
-    await queryInterface.dropTable("user_team");
+  down: async (queryInterface) => {
+    await queryInterface.dropTable("teams");
   },
 };
