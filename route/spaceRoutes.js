@@ -10,6 +10,9 @@ router.use(authMiddleware.protected);
 // Define the route for creating a space
 router.post("/createSpace", spaceController.createSpace);
 
+// get spaces
+router.get("/fetchSpace/:workspaceId", spaceController.fetchSpaces);
+
 // remove space 
 router.delete("/deleteSpace/:id", spaceController.removeSpace);
 
@@ -33,6 +36,9 @@ router.put("/updateList/:id", spaceController.updateList);
 
 // delete List 
 router.delete("/deleteList/:id", spaceController.deleteList);
+
+//  get getFoldersAndLists
+router.get("/folders-lists/:spaceId", spaceController.getFoldersAndLists);
 
 
 export default router;

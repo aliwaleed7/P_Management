@@ -10,7 +10,7 @@ router.use(authMiddleware.protected);
 // create work space
 router.post("/create", workspaceController.createWorkspace);
 
-// get work space with task
-router.get("/:workspaceId", workspaceController.getWorkspaceWithTasks);
+// get workspaces 
+router.get("/workspaces", workspaceController.fetchAllWorkS);
 
 export default router;

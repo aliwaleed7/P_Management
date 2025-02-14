@@ -3,6 +3,7 @@ import Workspace from "../models/workspace.js";
 import Spaces from "../models/Space.js";
 import Folder from "../models/Folder.js"; 
 import List from "../models/List.js";
+import Team from "../models/Team.js";
 
 
 const spaceController = {
@@ -62,6 +63,50 @@ const spaceController = {
       return res.status(500).json({
         success: false,
         message: "An error occurred while creating the space.",
+        error: error.message,
+      });
+    }
+  },
+
+  fetchSpaces: async (req, res) => {
+    const { workspaceId } = req.params; // Get workspaceId from URL parameters
+
+    try {
+      // Validate input
+      if (!workspaceId) {
+        return res.status(400).json({
+          success: false,
+          message: "workspaceId is required.",
+        });
+      }
+
+      // Check if the workspace exists
+      const workspace = await Workspace.findByPk(workspaceId);
+      if (!workspace) {
+        return res.status(404).json({
+          success: false,
+          message: "Workspace not found.",
+        });
+      }
+
+      // Fetch all spaces in the workspace
+      const spaces = await Spaces.findAll({
+        where: {
+          workspace_id: workspaceId, // Filter by workspaceId
+        },
+      });
+
+      // Send success response with the list of spaces
+      return res.status(200).json({
+        success: true,
+        message: "Spaces fetched successfully.",
+        data: spaces,
+      });
+    } catch (error) {
+      console.error("Error fetching spaces:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while fetching spaces.",
         error: error.message,
       });
     }
@@ -311,11 +356,13 @@ const spaceController = {
   },
 
   // Create a list inside a space or folder
+  // Create a list inside a space or folder
   createList: async (req, res) => {
-    const { space_id, folder_id, name, created_by } = req.body;
+    const { space_id, folder_id, name, created_by, progress, assigned_teamId } =
+      req.body;
 
     try {
-      // Validate input
+      // Validate required fields
       if (!name || !created_by) {
         return res.status(400).json({
           success: false,
@@ -327,6 +374,14 @@ const spaceController = {
         return res.status(400).json({
           success: false,
           message: "Either space_id or folder_id is required.",
+        });
+      }
+
+      // Validate optional `progress` field
+      if (progress !== undefined && (progress < 0 || progress > 100)) {
+        return res.status(400).json({
+          success: false,
+          message: "Progress must be between 0 and 100.",
         });
       }
 
@@ -352,12 +407,25 @@ const spaceController = {
         }
       }
 
+      // Check if the assigned team exists (if provided)
+      if (assigned_teamId) {
+        const team = await Team.findByPk(assigned_teamId);
+        if (!team) {
+          return res.status(404).json({
+            success: false,
+            message: "Assigned team not found.",
+          });
+        }
+      }
+
       // Create the list
       const list = await List.create({
-        space_id: space_id || null, // Set to null if folder_id is provided
-        folder_id: folder_id || null, // Set to null if space_id is provided
+        space_id: space_id || null, // Set to null if not provided
+        folder_id: folder_id || null, // Set to null if not provided
         name,
         created_by,
+        team_id: assigned_teamId || null, // Nullable
+        progress: progress !== undefined ? progress : null, // Nullable
       });
 
       // Send success response
@@ -454,6 +522,32 @@ const spaceController = {
         message: "An error occurred while deleting the list.",
         error: error.message,
       });
+    }
+  },
+   getFoldersAndLists : async(req, res)=> {
+    try {
+      const { spaceId } = req.params;
+
+      // Fetch folders that belong to the space and have no parent folder
+      const folders = await Folder.findAll({
+        where: {
+          space_id: spaceId,
+          parent_folder_id: null,
+        },
+      });
+
+      // Fetch lists that belong to the space and have no folder assigned
+      const lists = await List.findAll({
+        where: {
+          space_id: spaceId,
+          folder_id: null,
+        },
+      });
+
+      res.json({ folders, lists });
+    } catch (error) {
+      console.error("Error fetching folders and lists:", error);
+      res.status(500).json({ message: "Internal Server Error" });
     }
   },
 };

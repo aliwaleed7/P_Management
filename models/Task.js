@@ -3,7 +3,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
 import List from "./List.js";
 import UserTeamWorkspace from "./UserTeamWorkspace.js";
-import Sprint from "./Sprint.js";
+import Sprint from "./sprints.js";
 import Timeline from "./Timeline.js";
 
 const Task = sequelize.define("Task", {

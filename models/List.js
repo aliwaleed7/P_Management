@@ -1,12 +1,16 @@
-// models/List.js
 import { DataTypes } from "sequelize";
-import sequelize from "../config/dbInit.js"; // Adjust the path to your Sequelize configuration
+import sequelize from "../config/dbInit.js";
+import Space from "./Space.js";
+import Team from "./Team.js";
+import Folder from "./Folder.js";
+import User from "./user.js";
 
 const List = sequelize.define(
-  "list",
+  "List",
   {
     id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true,
     },
@@ -14,45 +18,60 @@ const List = sequelize.define(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    progress: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
     space_id: {
       type: DataTypes.INTEGER,
-      allowNull: true, // A list can belong directly to a space (optional)
+      allowNull: true,
       references: {
-        model: "spaces", // References the Spaces table
+        model: "spaces",
+        key: "id",
+      },
+    },
+    team_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "teams",
         key: "id",
       },
     },
     folder_id: {
       type: DataTypes.INTEGER,
-      allowNull: true, // A list can belong to a folder (optional)
+      allowNull: true,
       references: {
-        model: "folders", // References the Folders table
+        model: "folders",
         key: "id",
       },
     },
     created_by: {
       type: DataTypes.INTEGER,
-      allowNull: false, // The user who created the list
+      allowNull: false,
       references: {
-        model: "Users", // References the Users table
+        model: "Users",
         key: "id",
       },
     },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
-    },
-    updated_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
-    },
   },
   {
-    tableName: "lists", // Explicitly set the table name
-    timestamps: false, // Disable Sequelize's default timestamps (createdAt, updatedAt)
+    tableName: "lists",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
   }
 );
+
+// Define associations
+List.belongsTo(Space, { foreignKey: "space_id", onDelete: "SET NULL" });
+List.belongsTo(Team, { foreignKey: "team_id", onDelete: "SET NULL" });
+List.belongsTo(Folder, { foreignKey: "folder_id", onDelete: "SET NULL" });
+List.belongsTo(User, { foreignKey: "created_by", onDelete: "CASCADE" });
+
+Space.hasMany(List, { foreignKey: "space_id", onDelete: "SET NULL" });
+Team.hasMany(List, { foreignKey: "team_id", onDelete: "SET NULL" });
+Folder.hasMany(List, { foreignKey: "folder_id", onDelete: "SET NULL" });
+User.hasMany(List, { foreignKey: "created_by", onDelete: "CASCADE" });
 
 export default List;

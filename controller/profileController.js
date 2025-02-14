@@ -1,5 +1,5 @@
 // controllers/userController.js
-import User from "../models/user.js";
+// import User from "../models/user.js";
 import Profile from "../models/Profile.js";
 
 const profileController = {

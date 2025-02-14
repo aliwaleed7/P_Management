@@ -38,6 +38,17 @@ const utils = {
       throw new Error(`Error deleting ${model.name}: ${error.message}`);
     }
   },
+
+  fetchAllFromTable : async (model) => {
+  try {
+    // Fetch all rows from the specified table
+    const data = await model.findAll();
+    return data;
+  } catch (error) {
+    console.error(`Error fetching data from table ${model.name}:`, error);
+    throw error; // Re-throw the error for the caller to handle
+  }
+}
 };
 
 export default utils;

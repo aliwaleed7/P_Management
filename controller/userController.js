@@ -22,7 +22,7 @@ const UserController = {
 
       // Generate JWT token
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "5h",
+        expiresIn: "9000h",
       });
 
       res.status(201).json({ message: "User registered successfully", token });
@@ -49,7 +49,7 @@ const UserController = {
 
       // Generate JWT token
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-        expiresIn: "5h",
+        expiresIn: "2000h",
       });
 
       res.status(200).json({ message: "Login successful", token });

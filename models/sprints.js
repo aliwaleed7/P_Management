@@ -1,10 +1,15 @@
 // models/Sprint.js
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
-import Project from "./Project.js";
-import Workspace from "./workspace.js";
+import List from "./List.js";
 
 const Sprint = sequelize.define("Sprint", {
+  id: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    primaryKey: true,
+    autoIncrement: true,
+  },
   name: {
     type: DataTypes.STRING,
     allowNull: false,
@@ -12,6 +17,10 @@ const Sprint = sequelize.define("Sprint", {
   goal: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  duration: {
+    type: DataTypes.DATE, // Represents the duration of the sprint
+    allowNull: false,
   },
   start_date: {
     type: DataTypes.DATE,
@@ -21,37 +30,38 @@ const Sprint = sequelize.define("Sprint", {
     type: DataTypes.DATE,
     allowNull: false,
   },
-  projectId: {
-    type: DataTypes.INTEGER,
-    references: {
-      model: Project,
-      key: "id",
-    },
+  is_active: {
+    type: DataTypes.BOOLEAN,
     allowNull: false,
+    defaultValue: false, // Defaults to false (inactive)
   },
-  workspaceId: {
+  status: {
+    type: DataTypes.TEXT,
+    allowNull: true, // Optional: e.g., "planned", "in progress", "completed"
+  },
+  list_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: Workspace,
+      model: List, // Reference to the Lists table
       key: "id",
     },
-    allowNull: false,
+    allowNull: true,
+    onDelete: "SET NULL", // If the referenced List is deleted, set list_id to NULL
   },
   created_at: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    allowNull: false,
+    defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
   },
   updated_at: {
     type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
+    allowNull: false,
+    defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
   },
 });
 
 // Relationships
-Project.hasMany(Sprint, { foreignKey: "projectId", onDelete: "CASCADE" });
-Sprint.belongsTo(Project, { foreignKey: "projectId" });
-
-Workspace.hasMany(Sprint, { foreignKey: "workspaceId", onDelete: "CASCADE" });
-Sprint.belongsTo(Workspace, { foreignKey: "workspaceId" });
+List.hasMany(Sprint, { foreignKey: "list_id", onDelete: "SET NULL" });
+Sprint.belongsTo(List, { foreignKey: "list_id" });
 
 export default Sprint;
