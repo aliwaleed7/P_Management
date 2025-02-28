@@ -8,13 +8,16 @@ const router = express.Router();
 // signup
 router.post("/signup", UserController.registerUser);
 
-// login 
+// login
 router.post("/login", UserController.loginUser);
 
-// protected middleware 
+// protected middleware
 router.use(authMiddleware.protected);
 
 // logout
 router.post("/logout", UserController.logoutUser);
+
+// fetch user role 
+router.get("/user-role/:user_id", UserController.getUserRole);
 
 export default router;

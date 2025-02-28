@@ -11,5 +11,6 @@ router.post("/create", teamController.createTeam);
 
 router.get("/workspace/:workspace_id/teams", teamController.getTeamsByWorkspace);
 
+router.get("/project/:projectId/members", teamController.getProjectMembers);
 
 export default router;

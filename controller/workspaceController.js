@@ -42,6 +42,7 @@ const workspaceController = {
           user_id: userId,
           workspace_id: workspace.id, // Link to the newly created workspace
           role: "admin", // Assign the admin role
+          isAccepted: true,
           joined_at: new Date(), // Set the join timestamp
         },
         { transaction }
@@ -67,9 +68,8 @@ const workspaceController = {
 
       res.status(500).json({ message: "Server error", error: errorMessage });
     }
-
   },
- 
+
   fetchAllWorkS: async (req, res) => {
     try {
       const workspaces = await utils.fetchAllFromTable(Workspace);
@@ -86,10 +86,37 @@ const workspaceController = {
 
       res.status(500).json({ message: "Server error", error: errorMessage });
     }
+  },
 
+  fetchUserWorkspaces: async (req, res) => {
+    const { userId } = req.params;
 
-  }
-  
+    try {
+      const userWorkspaces = await UserTeamWorkspace.findAll({
+        where: {
+          user_id: userId,
+          isAccepted: true,
+        },
+        include: [
+          {
+            model: Workspace,
+            attributes: ["id", "name"], // Fetch both id and name
+          },
+        ],
+      });
+
+      // Extract workspace data safely
+      const workspaceData = userWorkspaces
+        .map((workspace) => workspace.Workspace) // Ensure correct alias
+        .filter((ws) => ws) // Remove null/undefined
+        .map(({ id, name }) => ({ id, name })); // Extract needed fields
+      // Send the response
+      res.status(200).json({ workspaceData });
+    } catch (error) {
+      console.error("Error fetching user workspaces:", error);
+      res.status(500).json({ error: "Failed to fetch user workspaces" });
+    }
+  },
 
   // Get all users in a workspace
   // getAllUsersInWorkspace: async (req, res) => {

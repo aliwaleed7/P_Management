@@ -1,10 +1,10 @@
 // controllers/workspaceController.js
 import Workspace from "../models/workspace.js";
 import Spaces from "../models/Space.js";
-import Folder from "../models/Folder.js"; 
+import Folder from "../models/Folder.js";
 import List from "../models/List.js";
 import Team from "../models/Team.js";
-
+import Task from "../models/Task.js";
 
 const spaceController = {
   // Create a new space
@@ -524,7 +524,7 @@ const spaceController = {
       });
     }
   },
-   getFoldersAndLists : async(req, res)=> {
+  getFoldersAndLists: async (req, res) => {
     try {
       const { spaceId } = req.params;
 
@@ -548,6 +548,55 @@ const spaceController = {
     } catch (error) {
       console.error("Error fetching folders and lists:", error);
       res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
+
+  getFolderContent: async (req, res) => {
+    const { folderId } = req.params; // Get folderId from route parameters
+
+    try {
+      // Use Sequelize's findAll method to fetch lists with matching folder_id
+      const folderContent = await List.findAll({
+        where: { folder_id: folderId },
+        // Optionally, add additional options like attributes, order, include, etc.
+      });
+
+      // Return a success response with the data
+      return res.status(200).json({
+        success: true,
+        message: "Folder content fetched successfully.",
+        data: folderContent,
+      });
+    } catch (error) {
+      console.error("Error fetching folder content:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Error fetching folder content.",
+        error: error.message,
+      });
+    }
+  },
+
+  fetchTasksByListId: async (req, res) => {
+    try {
+      const { listId } = req.params; // Get projectId from URL params
+
+      if (!listId) {
+        return res
+          .status(400)
+          .json({ error: "listId (projectId) is required" });
+      }
+
+      // Fetch tasks associated with the given listId
+      const tasks = await Task.findAll({
+        where: { listId: listId },
+        order: [["dueDate", "ASC"]], // Optional: Order tasks by due date
+      });
+
+      return res.status(200).json({ success: true, tasks });
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
   },
 };

@@ -3,6 +3,7 @@ import Blacklist from "../models/Blacklist.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import UserTeamWorkspace from "../models/UserTeamWorkspace.js";
 
 dotenv.config();
 
@@ -73,6 +74,27 @@ const UserController = {
       res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
       res.status(500).json({ message: "Server error", error: error.message });
+    }
+  },
+
+  getUserRole: async (req, res) => {
+    try {
+      const { user_id } = req.params; // Extract user ID from URL params
+
+      // Find the user role in the workspace
+      const userRole = await UserTeamWorkspace.findOne({
+        where: { user_id },
+        attributes: ["role"], // Only fetch the role
+      });
+
+      if (!userRole) {
+        return res.status(404).json({ message: "User role not found" });
+      }
+
+      res.json({ role: userRole.role });
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
 };

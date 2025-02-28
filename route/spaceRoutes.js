@@ -40,5 +40,9 @@ router.delete("/deleteList/:id", spaceController.deleteList);
 //  get getFoldersAndLists
 router.get("/folders-lists/:spaceId", spaceController.getFoldersAndLists);
 
+// Fetch folder content by folder ID
+router.get("/folders/:folderId", spaceController.getFolderContent);
+
+router.get("/fetchTasks/:listId", spaceController.fetchTasksByListId);
 
 export default router;

@@ -13,4 +13,8 @@ router.post("/create", workspaceController.createWorkspace);
 // get workspaces 
 router.get("/workspaces", workspaceController.fetchAllWorkS);
 
+// get user work spaces 
+router.get("/users/:userId/workspaces", workspaceController.fetchUserWorkspaces);
+
+
 export default router;
