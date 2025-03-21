@@ -45,4 +45,6 @@ router.get("/folders/:folderId", spaceController.getFolderContent);
 
 router.get("/fetchTasks/:listId", spaceController.fetchTasksByListId);
 
+router.get("/spaces-with-projects", spaceController.getSpacesWithProjects);
+
 export default router;

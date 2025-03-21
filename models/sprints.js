@@ -3,7 +3,7 @@ import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
 import List from "./List.js";
 
-const Sprint = sequelize.define("Sprint", {
+const Sprint = sequelize.define("sprint", {
   id: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -19,7 +19,7 @@ const Sprint = sequelize.define("Sprint", {
     allowNull: true,
   },
   duration: {
-    type: DataTypes.DATE, // Represents the duration of the sprint
+    type: DataTypes.INTEGER, // Represents the duration of the sprint
     allowNull: false,
   },
   start_date: {
@@ -48,15 +48,17 @@ const Sprint = sequelize.define("Sprint", {
     allowNull: true,
     onDelete: "SET NULL", // If the referenced List is deleted, set list_id to NULL
   },
-  created_at: {
+  createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
+    defaultValue: DataTypes.NOW,
+    field: "created_at", // ✅ Maps Sequelize `createdAt` to `created_at`
   },
-  updated_at: {
+  updatedAt: {
     type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: DataTypes.NOW, // Automatically set to the current timestamp
+    defaultValue: DataTypes.NOW,
+    field: "updated_at", // ✅ Maps Sequelize `updatedAt` to `updated_at`
   },
 });
 

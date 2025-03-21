@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
+import Task from "./Task.js";
 
 const TimeLog = sequelize.define(
   "TimeLog",
@@ -10,61 +11,67 @@ const TimeLog = sequelize.define(
       autoIncrement: true,
       allowNull: false,
     },
-    task_id: {
+    taskId: {
       type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    subtask_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
+      field: "task_id", // ✅ Ensure it matches DB column name
+      references: {
+        model: Task,
+        key: "id",
+      },
       allowNull: false,
     },
-    start_time: {
-      type: DataTypes.DATE,
+    subtaskId: {
+      type: DataTypes.INTEGER,
+      field: "subtask_id", // ✅ Ensure correct column mapping
       allowNull: true,
     },
-    end_time: {
+    userId: {
+      type: DataTypes.INTEGER,
+      field: "user_id",
+      allowNull: false,
+    },
+    startTime: {
       type: DataTypes.DATE,
+      field: "start_time",
+      allowNull: true,
+    },
+    endTime: {
+      type: DataTypes.DATE,
+      field: "end_time",
       allowNull: true,
     },
     duration: {
-      type: DataTypes.TEXT, // Duration in minutes
+      type: DataTypes.INTEGER,
       allowNull: true,
     },
-    created_at: {
+    createdAt: {
       type: DataTypes.DATE,
+      field: "created_at",
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-    updated_at: {
+    updatedAt: {
       type: DataTypes.DATE,
+      field: "updated_at",
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
   },
   {
-    tableName: "time_logs",
-    timestamps: false, // Disable auto timestamps since created_at and updated_at are manually defined
+    tableName: "time_logs", // ✅ Explicitly define table name
+    timestamps: true,
   }
 );
 
-// Define relationships (associations)
-TimeLog.associate = (models) => {
-  TimeLog.belongsTo(models.Task, {
-    foreignKey: "task_id",
-    onDelete: "CASCADE",
-  });
-  TimeLog.belongsTo(models.Subtask, {
-    foreignKey: "subtask_id",
-    onDelete: "CASCADE",
-  });
-  TimeLog.belongsTo(models.User, {
-    foreignKey: "user_id",
-    onDelete: "CASCADE",
-  });
-};
+// ✅ Fix Association
+Task.hasMany(TimeLog, {
+  foreignKey: "taskId", // Sequelize uses `taskId` but maps to `task_id`
+  as: "timeLogs",
+});
+
+TimeLog.belongsTo(Task, {
+  foreignKey: "taskId",
+  as: "task",
+});
 
 export default TimeLog;

@@ -18,7 +18,7 @@ module.exports = {
         allowNull: true,
       },
       duration: {
-        type: Sequelize.DATE, // ✅ Added: Matches latest schema
+        type: Sequelize.INTEGER, // ✅ Added: Matches latest schema
         allowNull: false,
       },
       start_date: {

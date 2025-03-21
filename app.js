@@ -10,6 +10,10 @@ import notification from "./route/notificationRoute.js";
 import space from "./route/spaceRoutes.js"
 import timeLog from "./route/timeLogRoute.js"
 import Team from "./route/teamRoute.js";
+import Sprint from "./route/sprintRoute.js";
+import dash from "./route/dashRoute.js";
+
+
 
 dotenv.config();
 
@@ -32,5 +36,7 @@ app.use("/api/notification", notification);
 app.use("/api/space", space);
 app.use("/api/timelogs", timeLog);
 app.use("/api/teams", Team);
+app.use("/api/sprint", Sprint);
+app.use("/api/dash", dash);
 
 export default app;

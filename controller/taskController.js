@@ -9,6 +9,7 @@ import Subtask from "../models/Subtask.js";
 import utils from "./utils.js";
 import fs from "fs";
 import Dependency from "../models/Dependencies.js";
+ 
 
 const taskController = {
   // Create a new task
@@ -338,18 +339,6 @@ const taskController = {
         });
       }
 
-      // Validate dependency type
-      const validTypes = [
-        "start to start",
-        "finish to finish",
-        "finish to start",
-      ];
-      if (!validTypes.includes(dependency_type)) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Invalid dependency type." });
-      }
-
       // Create dependency in database
       const dependency = await Dependency.create({
         taskId: task_id,
@@ -376,6 +365,51 @@ const taskController = {
     }
   },
 
-  
+  getTasksByListId: async (req, res) => {
+    try {
+      const { listId } = req.params; // Extract list ID from URL
+
+      const tasks = await Task.findAll({
+        where: { listId: listId },
+        attributes: [
+          "id",
+          "title",
+          "description",
+          "status",
+          "priority",
+          "dueDate",
+        ],
+        order: [["createdAt", "DESC"]],
+      });
+
+      if (tasks.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No tasks found for this list." });
+      }
+
+      res.json(tasks);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  },
+
+  getTaskDetails : async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const taskDetails = await utils.getTaskDetails(taskId);
+
+    if (!taskDetails) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+
+    res.status(200).json(taskDetails);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+
 };
 export default taskController;

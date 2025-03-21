@@ -41,11 +41,7 @@ const Dependency = sequelize.define(
       allowNull: true, // Changed to true
     },
     dependencyType: {
-      type: DataTypes.ENUM(
-        "Finish-to-Start",
-        "Start-to-Start",
-        "Finish-to-Finish"
-      ),
+      type: DataTypes.STRING,
       allowNull: false,
     },
   },
@@ -63,14 +59,14 @@ Task.hasMany(Dependency, {
 });
 Dependency.belongsTo(Task, { foreignKey: "taskId", as: "task" });
 
-Dependency.belongsTo(Task, {
-  foreignKey: "dependentOnTaskId",
-  as: "dependentOnTask",
-});
-Dependency.belongsTo(Subtask, {
-  foreignKey: "dependentOnSubTaskId",
-  as: "dependentOnSubTask",
-});
+// Dependency.belongsTo(Task, {
+//   foreignKey: "dependentOnTaskId",
+//   as: "dependentOnTask",
+// });
+// Dependency.belongsTo(Subtask, {
+//   foreignKey: "dependentOnSubTaskId",
+//   as: "dependentOnSubTask",
+// });
 
 export default Dependency;
   

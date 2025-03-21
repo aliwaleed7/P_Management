@@ -599,6 +599,28 @@ const spaceController = {
       return res.status(500).json({ error: "Internal Server Error" });
     }
   },
+
+  getSpacesWithProjects: async (req, res) => {
+    try {
+      // Fetch spaces and include the related lists (projects)
+      const spaces = await Spaces.findAll({
+        include: [
+          {
+            model: List,
+            attributes: ["id", "name"], // Project fields
+          },
+        ],
+        attributes: ["id", "name"],
+        order: [["created_at", "DESC"]], // Order spaces by creation date (latest first)
+      });
+
+      // Return response
+      return res.status(200).json(spaces);
+    } catch (error) {
+      console.error("Error fetching spaces with projects:", error);
+      return res.status(500).json({ message: "Internal Server Error" });
+    }
+  },
 };
 
 export default spaceController;

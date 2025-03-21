@@ -48,5 +48,10 @@ router.post("/createDepend", taskController.createDependency);
 
 router.delete("/deleteDepend/:id", taskController.deleteDependency); 
 
+router.get("/tasks/list/:listId", taskController.getTasksByListId);
+
+router.get("/getTaskDetails/:taskId", taskController.getTaskDetails);
+
+
 
 export default router;
