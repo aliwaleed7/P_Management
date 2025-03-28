@@ -2,6 +2,7 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js"; // Import your Sequelize instance
 import Lists from "./List.js"; // Import Lists model
+import Workspace from "./workspace.js"; // Import Workspace model
 
 const Dashboard = sequelize.define(
   "dashboard",
@@ -17,6 +18,14 @@ const Dashboard = sequelize.define(
         key: "id",
       },
       allowNull: false,
+    },
+    ws_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false, // Make sure it's NOT NULL
+      references: {
+        model: Workspace,
+        key: "id",
+      },
     },
     created_at: {
       type: DataTypes.DATE,
@@ -39,5 +48,8 @@ const Dashboard = sequelize.define(
 // Relationships
 Lists.hasMany(Dashboard, { foreignKey: "list_id", onDelete: "CASCADE" });
 Dashboard.belongsTo(Lists, { foreignKey: "list_id" });
+
+Workspace.hasMany(Dashboard, { foreignKey: "ws_id", onDelete: "CASCADE" });
+Dashboard.belongsTo(Workspace, { foreignKey: "ws_id" });
 
 export default Dashboard;

@@ -602,8 +602,15 @@ const spaceController = {
 
   getSpacesWithProjects: async (req, res) => {
     try {
-      // Fetch spaces and include the related lists (projects)
+      const { workspace_id } = req.query; // Get workspace_id from query parameters
+
+      if (!workspace_id) {
+        return res.status(400).json({ message: "workspace_id is required" });
+      }
+
+      // Fetch spaces where workspace_id matches and include the related lists (projects)
       const spaces = await Spaces.findAll({
+        where: { workspace_id }, // Filter spaces by workspace_id
         include: [
           {
             model: List,

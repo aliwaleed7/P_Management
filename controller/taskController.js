@@ -9,7 +9,6 @@ import Subtask from "../models/Subtask.js";
 import utils from "./utils.js";
 import fs from "fs";
 import Dependency from "../models/Dependencies.js";
- 
 
 const taskController = {
   // Create a new task
@@ -395,21 +394,19 @@ const taskController = {
     }
   },
 
-  getTaskDetails : async (req, res) => {
-  try {
-    const { taskId } = req.params;
-    const taskDetails = await utils.getTaskDetails(taskId);
+  getTaskDetails: async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const taskDetails = await utils.getTaskDetails(taskId);
 
-    if (!taskDetails) {
-      return res.status(404).json({ message: "Task not found" });
+      if (!taskDetails) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      res.status(200).json(taskDetails);
+    } catch (error) {
+      res.status(500).json({ message: "Internal server error" });
     }
-
-    res.status(200).json(taskDetails);
-  } catch (error) {
-    res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-
+  },
 };
 export default taskController;

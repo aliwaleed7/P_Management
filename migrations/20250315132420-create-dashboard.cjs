@@ -21,6 +21,16 @@ module.exports = {
         onDelete: "SET NULL",
         allowNull: true,
       },
+      ws_id: {
+        type: Sequelize.INTEGER,
+        allowNull: false, // Ensuring it's NOT NULL
+        references: {
+          model: "Workspaces", // Reference to workspace table
+          key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "RESTRICT", // Prevent deletion if referenced
+      },
       created_at: {
         type: Sequelize.DATE,
         allowNull: false,
