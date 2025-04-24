@@ -32,10 +32,10 @@ module.exports = {
       assigned_to: {
         type: Sequelize.INTEGER,
         references: {
-          model: "user_team_workspaces", // Assuming "users" table exists
+          model: "Users", // ✅ Updated reference
           key: "id",
         },
-        onDelete: "SET NULL", // Task remains if user is deleted
+        onDelete: "SET NULL",
         allowNull: true,
       },
       dueDate: {

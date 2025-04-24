@@ -71,7 +71,6 @@ const timeLogController = {
       // Calculate hours and minutes
       const hours = Math.floor(durationInMinutes / 60);
       const minutes = durationInMinutes % 60;
-      
 
       let duration;
       if (hours > 0) {
@@ -126,6 +125,35 @@ const timeLogController = {
       return res
         .status(500)
         .json({ message: "Failed to delete time log", error });
+    }
+  },
+
+  getTimeLogsByTaskId: async (taskId) => {
+    try {
+      const timeLogs = await TimeLog.findAll({
+        where: { task_id: taskId },
+        order: [["start_time", "ASC"]],
+      });
+
+      return timeLogs;
+    } catch (error) {
+      console.error("Error fetching time logs:", error);
+      throw new Error("Unable to fetch time logs");
+    }
+  },
+  getTimeLogs: async (req, res) => {
+    try {
+      const { taskId } = req.params;
+
+      if (!taskId) {
+        return res.status(400).json({ message: "Task ID is required." });
+      }
+
+      const timeLogs = await timeLogController.getTimeLogsByTaskId(taskId);
+
+      return res.status(200).json({ timeLogs });
+    } catch (error) {
+      return res.status(500).json({ message: error.message });
     }
   },
 };

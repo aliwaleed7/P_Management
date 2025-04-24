@@ -68,17 +68,9 @@ const utils = {
             required: false, // Task is returned even if it has no dependencies
           },
           {
-            model: UserTeamWorkspace, // Join through user_team_workspaces
-            as: "user_team_workspace", // Ensure this alias matches the association
-            attributes: ["user_id"],
-            include: [
-              {
-                model: User,
-                as: "User", // Ensure this alias matches the association
-                attributes: ["username"],
-              },
-            ],
-            // Don't fetch user_team_workspaces fields
+            model: User, // Directly join User model now
+            as: "assignedUser", // Use the alias used in the Task -> User association
+            attributes: ["id", "username"],
             required: false,
           },
           {

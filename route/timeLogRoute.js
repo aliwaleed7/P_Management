@@ -12,8 +12,11 @@ router.post("/start", timeLogController.startTimer);
 // Route to stop the timer
 router.put("/stop", timeLogController.stopTimer);
 
-// delete timer 
+// delete timer
 router.delete("/delete/:id", timeLogController.deleteTimer);
+
+// get time logs
+router.get("/time-logs/:taskId", timeLogController.getTimeLogs);
 
 
 export default router;

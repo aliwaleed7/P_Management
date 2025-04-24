@@ -14,7 +14,7 @@ const startServer = async () => {
     // Initialize Socket.io
     const io = new Server(server, {
       cors: {
-        origin: "http://localhost:3000", // Adjust for production
+        origin: ["http://localhost:5173", "http://localhost:5173/test" ],
         methods: ["GET", "POST"],
       },
     });

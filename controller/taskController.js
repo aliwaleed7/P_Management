@@ -4,11 +4,15 @@ import List from "../models/List.js";
 import User from "../models/user.js";
 import path from "path";
 import File from "../models/files.js";
-import Comment from "../models/comment.js";
 import Subtask from "../models/Subtask.js";
 import utils from "./utils.js";
 import fs from "fs";
 import Dependency from "../models/Dependencies.js";
+import Comment from "../models/Comment.js";
+import Notification from "../models/Notifications.js";
+import UserTeamWorkspace from "../models/UserTeamWorkspace.js";
+import io from "../app.js";
+import { Op } from "sequelize";
 
 const taskController = {
   // Create a new task
@@ -162,157 +166,6 @@ const taskController = {
     }
   },
 
-  // Attach a file to a task
-  attachFile: async (req, res) => {
-    const { taskId, subtaskId } = req.body; // Extract taskId or subtaskId from the request
-    const uploadedBy = req.user.id; // Assuming req.user contains authenticated user info
-    const file = req.file; // File uploaded via middleware (e.g., multer)
-
-    try {
-      // Ensure either taskId or subtaskId is provided, not both
-      if (!taskId && !subtaskId) {
-        return res.status(400).json({
-          message: "Either taskId or subtaskId must be provided",
-        });
-      }
-
-      if (taskId && subtaskId) {
-        return res.status(400).json({
-          message: "Provide only one: taskId or subtaskId, not both",
-        });
-      }
-
-      // Check if the task or subtask exists
-      let parent;
-      if (taskId) {
-        parent = await Task.findByPk(taskId);
-        if (!parent) {
-          return res.status(404).json({ message: "Task not found" });
-        }
-      } else if (subtaskId) {
-        parent = await Subtask.findByPk(subtaskId);
-        if (!parent) {
-          return res.status(404).json({ message: "Subtask not found" });
-        }
-      }
-
-      // Ensure a file is uploaded
-      if (!file) {
-        return res.status(400).json({ message: "No file uploaded" });
-      }
-
-      // Save the file path to the database
-      const filePath = path.join("uploads", file.filename); // Adjust the file path if needed
-      const savedFile = await File.create({
-        file_path: filePath,
-        task_id: taskId || null,
-        subtask_id: subtaskId || null,
-        uploaded_by: uploadedBy,
-        uploaded_at: new Date(),
-      });
-
-      res.status(201).json({
-        message: "File attached successfully",
-        file: savedFile,
-      });
-    } catch (error) {
-      console.error("Error attaching file:", error);
-      res.status(500).json({ message: "Failed to attach file", error });
-    }
-  },
-
-  // Delete an attached file from a task
-  deleteFile: async (req, res) => {
-    const { taskId, fileId } = req.params; // Extract taskId and fileId from request params
-
-    try {
-      // Check if the task exists
-      const task = await Task.findByPk(taskId);
-      if (!task) {
-        return res.status(404).json({ message: "Task not found" });
-      }
-
-      // Find the file in the database
-      const file = await File.findByPk(fileId);
-      if (!file) {
-        return res.status(404).json({ message: "File not found" });
-      }
-
-      // Check if the file is attached to the correct task
-      if (String(file.task_id) !== String(taskId)) {
-        return res
-          .status(400)
-          .json({ message: "File is not attached to this task" });
-      }
-
-      // Delete the file from the file system
-      const filePath = path.join("uploads", file.file_path); // Get the full file path
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath); // Delete the file
-      }
-
-      // Remove the file from the database
-      await file.destroy();
-
-      res.status(200).json({
-        message: "File deleted successfully",
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Failed to delete file", error });
-    }
-  },
-
-  addComment: async (req, res) => {
-    const { taskId, subtaskId, content } = req.body; // Extract data from request body
-    const file = req.file; // Assuming file is uploaded using multer and available as req.file
-    const userId = req.user.id; // Assuming user ID is available from authentication middleware
-
-    try {
-      // Validate input: At least one of content or file should be provided
-      if (!content && !file) {
-        return res
-          .status(400)
-          .json({ message: "Either content or file must be provided" });
-      }
-
-      if (!taskId && !subtaskId) {
-        return res
-          .status(400)
-          .json({ message: "Either taskId or subtaskId must be provided" });
-      }
-
-      // Create the comment in the database
-      const newComment = await Comment.create({
-        task_id: taskId || null,
-        subtask_id: subtaskId || null,
-        user_id: userId,
-        content: content || null,
-        created_at: new Date(),
-        updated_at: new Date(),
-      });
-
-      // If a file is uploaded, save it and associate it with the comment
-      if (file) {
-        const filePath = path.join("uploads", file.filename); // Assuming multer saves the file to `uploads/`
-        await File.create({
-          file_path: filePath,
-          comment_id: newComment.id,
-          uploaded_by: userId,
-          uploaded_at: new Date(),
-        });
-      }
-
-      res.status(201).json({
-        message: "Comment created successfully",
-        comment: newComment,
-      });
-    } catch (error) {
-      console.error("Error adding comment:", error);
-      res.status(500).json({ message: "Failed to create comment", error });
-    }
-  },
-
   createDependency: async (req, res) => {
     try {
       const {
@@ -406,6 +259,172 @@ const taskController = {
       res.status(200).json(taskDetails);
     } catch (error) {
       res.status(500).json({ message: "Internal server error" });
+    }
+  },
+
+  createComment: async (req, res) => {
+    try {
+      const { task_id, content } = req.body;
+      const files = req.files; // Uploaded files
+      const user_id = req.user.id;
+
+      // Create comment
+      const newComment = await Comment.create({
+        task_id,
+        user_id,
+        content,
+      });
+
+      // If files were uploaded, save them
+      if (files.length > 0) {
+        const fileRecords = files.map((file) => ({
+          file_path: file.path,
+          task_id,
+          comment_id: newComment.id,
+          uploaded_by: user_id,
+        }));
+        await File.bulkCreate(fileRecords);
+      }
+
+      res
+        .status(201)
+        .json({ message: "Comment added successfully", newComment });
+    } catch (error) {
+      console.error("Error creating comment:", error);
+      res.status(500).json({ error: "Failed to add comment" });
+    }
+  },
+
+  getComments: async (req, res) => {
+    try {
+      const { taskId } = req.params;
+
+      const comments = await Comment.findAll({
+        where: { task_id: taskId },
+        attributes: ["content", "id"],
+        include: [
+          {
+            model: File,
+            attributes: ["file_path", "id"],
+          },
+        ],
+      });
+
+      res.status(200).json(comments);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      res.status(500).json({ error: "Failed to fetch comments" });
+    }
+  },
+  updateTaskStatus: async (req, res) => {
+    try {
+      const { taskId } = req.params;
+      const { status, workspaceId } = req.body;
+      const userId = req.user.id;
+
+      // Find the task along with the list to get team_id
+      const task = await Task.findByPk(taskId, { include: { model: List } });
+
+      if (!task) {
+        return res.status(404).json({ message: "Task not found" });
+      }
+
+      if (!task.List) {
+        return res
+          .status(400)
+          .json({ message: "Task is not associated with any list" });
+      }
+
+      const teamId = task.List.team_id;
+
+      // Find the team leader of the team
+      const teamLeader = await UserTeamWorkspace.findOne({
+        where: { team_id: teamId, role: "team_leader" },
+      });
+
+      // Update the task status
+      await task.update({ status });
+
+      // Handling notifications
+      if (status === "Completed" && teamLeader) {
+        // Notify the team leader when the task is completed
+        const notification = await Notification.create({
+          message: `The task "${task.title}" has been marked as Completed.`,
+          userId: teamLeader.user_id, // Notify the team leader
+          workspaceId: workspaceId,
+        });
+
+        // Emit notification to Team Leader when task is completed
+
+        const io = req.app.get("io"); // Get the Socket.IO instance
+        const userRoom = `user_${teamLeader.user_id}&${workspaceId}`; // Define a room for the specific user
+        io.to(userRoom).emit("notification", {
+          userId: teamLeader.user_id,
+          workspaceId: workspaceId,
+          message: notification.message,
+        });
+      }
+
+      if (status === "Done" || status === "In Progress") {
+        // Notify the assigned user when the team leader reviews the task
+        if (task.assigned_to) {
+          const notification = await Notification.create({
+            message: `The task "${task.title}" status has been updated to "${status}".`,
+            userId: task.assigned_to, // Notify the assigned user
+            workspaceId: workspaceId,
+          });
+
+          const io = req.app.get("io"); // Get the Socket.IO instance
+          const userRoom2 = `user_${teamLeader.user_id}&${workspaceId}`; // Define a room for the specific user
+          io.to(userRoom2).emit("notification", {
+            userId: task.assigned_to,
+            workspaceId: workspaceId,
+            message: notification.message,
+          });
+        }
+      }
+      res.status(200).json({ message: "Task status updated successfully" });
+    } catch (error) {
+      console.error("Error updating task status:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  },
+  checkUpcomingDeadlines: async () => {
+    try {
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // Get tasks that are due within the next 24 hours
+      const tasks = await Task.findAll({
+        where: {
+          dueDate: {
+            [Op.between]: [new Date(), tomorrow],
+          },
+        },
+      });
+
+      for (const task of tasks) {
+        if (task.assigned_to) {
+          // Create a notification
+          const notification = await Notification.create({
+            userId: task.assigned_to,
+            workspaceId: 2, // Assuming list belongs to a workspace
+            message: `Task "${task.title}" is due soon! Deadline: ${task.dueDate}`,
+          });
+
+          const io = req.app.get("io"); // Get the Socket.IO instance
+          const userRoom2 = `user_${task.assigned_to}&${2}`; // Define a room for the specific user
+          io.to(userRoom2).emit("notification", {
+            userId: task.assigned_to,
+            workspaceId: 2,
+            message: notification.message,
+          });
+        }
+      }
+
+      console.log("Upcoming deadlines checked and notifications sent.");
+    } catch (error) {
+      console.error("Error checking upcoming deadlines:", error);
     }
   },
 };

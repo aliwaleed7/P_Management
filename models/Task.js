@@ -5,6 +5,7 @@ import List from "./List.js";
 import UserTeamWorkspace from "./UserTeamWorkspace.js";
 import Sprint from "./sprints.js";
 import Timeline from "./Timeline.js";
+import User from "./user.js";
 
 const Task = sequelize.define("Task", {
   id: {
@@ -39,8 +40,8 @@ const Task = sequelize.define("Task", {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: UserTeamWorkspace, // Reference to user_team_workspaces
-      key: "user_id",
+      model: User,
+      key: "id",
     },
   },
   dueDate: {
@@ -94,7 +95,7 @@ Timeline.hasMany(Task, { foreignKey: "milestoneId", onDelete: "CASCADE" });
 Task.belongsTo(Timeline, { foreignKey: "milestoneId" });
 
 // Relationship between Task and User (via user_team_workspaces)
-UserTeamWorkspace.hasMany(Task, { foreignKey: "assigned_to" });
-Task.belongsTo(UserTeamWorkspace, { foreignKey: "assigned_to" });
+User.hasMany(Task, { foreignKey: "assigned_to", as: "assignedUser" });
+Task.belongsTo(User, { foreignKey: "assigned_to", as: "assignedUser" });
 
 export default Task;

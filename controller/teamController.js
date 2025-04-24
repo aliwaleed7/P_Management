@@ -1,10 +1,9 @@
 import Team from "../models/Team.js";
 import Workspace from "../models/workspace.js";
-import UserTeamWorkspace from "../models/UserTeamWorkspace.js"
+import UserTeamWorkspace from "../models/UserTeamWorkspace.js";
 import User from "../models/user.js";
 import List from "../models/List.js";
 import sequelize from "../config/dbInit.js";
-
 
 const teamController = {
   createTeam: async (req, res) => {
@@ -88,18 +87,21 @@ const teamController = {
         // Fetch team members with user IDs and usernames
         const members = await UserTeamWorkspace.findAll({
           where: { team_id: project.team_id },
-          include: [{
-            model: User,
-            attributes: ["id", "username"] // Include both ID and username
-          }],
+          include: [
+            {
+              model: User,
+              attributes: ["id", "username"], // Include both ID and username
+            },
+          ],
         });
 
         response.team_name = team ? team.team_name : "Unknown Team";
-        response.members = members.map((member) => ({
-          id: member.User?.id,          // Include user ID
-          username: member.User?.username
-        })).filter(member => member.id && member.username); // Filter invalid entries
-
+        response.members = members
+          .map((member) => ({
+            id: member.User?.id, // Include user ID
+            username: member.User?.username,
+          }))
+          .filter((member) => member.id && member.username); // Filter invalid entries
       } else {
         // Get users without a team including their IDs
         const usersWithoutTeam = await User.findAll({
@@ -110,15 +112,15 @@ const teamController = {
             FROM user_team_workspaces 
             WHERE team_id IS NOT NULL
           )
-        `)
+        `),
           },
           attributes: ["id", "username"], // Include both ID and username
         });
 
         response.team_name = null;
         response.members = usersWithoutTeam.map((user) => ({
-          id: user.id,          // Include user ID
-          username: user.username
+          id: user.id, // Include user ID
+          username: user.username,
         }));
       }
 
@@ -127,7 +129,38 @@ const teamController = {
       console.error("Error fetching project members:", error);
       res.status(500).json({ message: "Server error" });
     }
-  }
+  },
+  getTeamMembers: async (req, res) => {
+    try {
+      const { teamId } = req.params;
+
+      if (!teamId) {
+        return res.status(400).json({ message: "Team ID is required." });
+      }
+
+      // Fetch team members and include user details
+      const teamMembers = await UserTeamWorkspace.findAll({
+        where: { team_id: teamId },
+        include: [
+          {
+            model: User,
+            attributes: ["id", "username", "email"], // Only fetch relevant user details
+          },
+        ],
+      });
+
+      if (teamMembers.length === 0) {
+        return res
+          .status(404)
+          .json({ message: "No members found for this team." });
+      }
+
+      return res.status(200).json(teamMembers);
+    } catch (error) {
+      console.error("Error fetching team members:", error);
+      return res.status(500).json({ message: "Internal server error." });
+    }
+  },
 };
 
 export default teamController;

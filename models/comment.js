@@ -1,53 +1,62 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
+import Task from "./Task.js";
+import Subtask from "./Subtask.js";
+import User from "./user.js";
 
 const Comment = sequelize.define(
   "Comment",
   {
     id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
-    },
-    task_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    subtask_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    user_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
     },
     content: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    created_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+    task_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "tasks",
+        key: "id",
+      },
     },
-    updated_at: {
-      type: DataTypes.DATE,
+    subtask_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "subtasks",
+        key: "id",
+      },
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
   },
   {
     tableName: "comments",
-    timestamps: false, // Disable automatic Sequelize timestamps if not needed
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
   }
 );
 
-// Define relationships (associations)
-Comment.associate = (models) => {
-  Comment.belongsTo(models.Task, { foreignKey: "task_id" });
-  Comment.belongsTo(models.Subtask, { foreignKey: "subtask_id" });
-  Comment.belongsTo(models.User, { foreignKey: "user_id" });
-};
+// Define associations
+Comment.belongsTo(Task, { foreignKey: "task_id", onDelete: "SET NULL" });
+Comment.belongsTo(Subtask, { foreignKey: "subtask_id", onDelete: "SET NULL" });
+Comment.belongsTo(User, { foreignKey: "user_id", onDelete: "CASCADE" });
+
+Task.hasMany(Comment, { foreignKey: "task_id", onDelete: "SET NULL" });
+Subtask.hasMany(Comment, { foreignKey: "subtask_id", onDelete: "SET NULL" });
+User.hasMany(Comment, { foreignKey: "user_id", onDelete: "CASCADE" });
 
 export default Comment;

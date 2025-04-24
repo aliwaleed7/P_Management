@@ -19,7 +19,7 @@ const authMiddleware = {
       // Check if token is blacklisted
       const isBlacklisted = await Blacklist.findOne({ where: { token } });
       if (isBlacklisted) {
-        return res.status(403).json({ message: "Invalid or expired token" });
+        return res.status(403).json({ message: "Invalid or expired" });
       }
       
       // Verify token

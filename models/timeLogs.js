@@ -9,68 +9,74 @@ const TimeLog = sequelize.define(
       type: DataTypes.INTEGER,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
-    taskId: {
+    task_id: {
       type: DataTypes.INTEGER,
-      field: "task_id", // ✅ Ensure it matches DB column name
+      allowNull: true,
       references: {
-        model: Task,
+        model: "Tasks", // References the Tasks model
         key: "id",
       },
-      allowNull: false,
+      onDelete: "CASCADE",
     },
-    subtaskId: {
+    subtask_id: {
       type: DataTypes.INTEGER,
-      field: "subtask_id", // ✅ Ensure correct column mapping
+      allowNull: true,
+      references: {
+        model: "Subtasks", // References the Subtasks model
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    user_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: "Users", // References the Users model
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    start_time: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
-    userId: {
-      type: DataTypes.INTEGER,
-      field: "user_id",
-      allowNull: false,
-    },
-    startTime: {
+    end_time: {
       type: DataTypes.DATE,
-      field: "start_time",
-      allowNull: true,
-    },
-    endTime: {
-      type: DataTypes.DATE,
-      field: "end_time",
       allowNull: true,
     },
     duration: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.TEXT, // Duration stored as text (minutes)
       allowNull: true,
     },
     createdAt: {
       type: DataTypes.DATE,
-      field: "created_at",
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+      field: "created_at",
     },
     updatedAt: {
       type: DataTypes.DATE,
-      field: "updated_at",
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+      field: "updated_at",
     },
   },
   {
-    tableName: "time_logs", // ✅ Explicitly define table name
+    tableName: "time_logs",
     timestamps: true,
+    underscored: true,
   }
 );
 
 // ✅ Fix Association
 Task.hasMany(TimeLog, {
-  foreignKey: "taskId", // Sequelize uses `taskId` but maps to `task_id`
+  foreignKey: "task_id", // Sequelize uses `taskId` but maps to `task_id`
   as: "timeLogs",
 });
 
 TimeLog.belongsTo(Task, {
-  foreignKey: "taskId",
+  foreignKey: "task_id",
   as: "task",
 });
 

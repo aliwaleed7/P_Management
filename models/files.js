@@ -1,14 +1,18 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
+import Task from "./Task.js";
+import Subtask from "./Subtask.js";
+import Comment from "./Comment.js";
+import User from "./user.js";
 
 const File = sequelize.define(
   "File",
   {
     id: {
       type: DataTypes.INTEGER,
+      allowNull: false,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: false,
     },
     file_path: {
       type: DataTypes.STRING,
@@ -17,37 +21,53 @@ const File = sequelize.define(
     task_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "tasks",
+        key: "id",
+      },
     },
     subtask_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "subtasks",
+        key: "id",
+      },
     },
     comment_id: {
       type: DataTypes.INTEGER,
       allowNull: true,
+      references: {
+        model: "comments",
+        key: "id",
+      },
     },
     uploaded_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
-    },
-    uploaded_at: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
   },
   {
     tableName: "files",
-    timestamps: false, // Disable createdAt and updatedAt fields if not needed
+    timestamps: true,
+    createdAt: "uploaded_at",
+    updatedAt: false, // Files are not typically updated
   }
 );
 
-// Define relationships (associations) if needed
-File.associate = (models) => {
-  File.belongsTo(models.Task, { foreignKey: "task_id" });
-  File.belongsTo(models.Subtask, { foreignKey: "subtask_id" });
-  File.belongsTo(models.Comment, { foreignKey: "comment_id" });
-  File.belongsTo(models.User, { foreignKey: "uploaded_by" });
-};
+// Define associations
+File.belongsTo(Task, { foreignKey: "task_id", onDelete: "SET NULL" });
+File.belongsTo(Subtask, { foreignKey: "subtask_id", onDelete: "SET NULL" });
+File.belongsTo(Comment, { foreignKey: "comment_id", onDelete: "SET NULL" });
+File.belongsTo(User, { foreignKey: "uploaded_by", onDelete: "CASCADE" });
+
+Task.hasMany(File, { foreignKey: "task_id", onDelete: "SET NULL" });
+Subtask.hasMany(File, { foreignKey: "subtask_id", onDelete: "SET NULL" });
+Comment.hasMany(File, { foreignKey: "comment_id", onDelete: "SET NULL" });
+User.hasMany(File, { foreignKey: "uploaded_by", onDelete: "CASCADE" });
 
 export default File;

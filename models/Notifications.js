@@ -1,31 +1,52 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/dbInit.js";
 import User from "./user.js";
-import Workspace from "./workspace.js"; // Import the Workspace model if it exists
+import Workspace from "./workspace.js";
 
 const Notification = sequelize.define(
-  "Notification",
+  "Notifications",
   {
+    id: {
+      type: DataTypes.INTEGER,
+      autoIncrement: true,
+      primaryKey: true,
+      allowNull: false,
+    },
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: User, // Reference to Users table
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
+    workspaceId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      references: {
+        model: Workspace, // Reference to Workspaces table
+        key: "id",
+      },
+      onDelete: "CASCADE",
+    },
     message: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
     readStatus: {
       type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    createdAt: {
-      type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: sequelize.literal("CURRENT_TIMESTAMP"),
+      defaultValue: false,
     },
   },
   {
-    updatedAt: false, // Ensure updatedAt is completely disabled
+    timestamps: true,
+    updatedAt: false,
   }
 );
 
-// Define associations
+// Relationships
 User.hasMany(Notification, { foreignKey: "userId", onDelete: "CASCADE" });
 Notification.belongsTo(User, { foreignKey: "userId" });
 

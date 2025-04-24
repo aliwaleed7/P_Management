@@ -79,12 +79,12 @@ const UserController = {
 
   getUserRole: async (req, res) => {
     try {
-      const { user_id } = req.params; // Extract user ID from URL params
+      const { user_id } = req.params;
+      const { workspace_id } = req.query; // ✅ GET request => use query
 
-      // Find the user role in the workspace
       const userRole = await UserTeamWorkspace.findOne({
-        where: { user_id },
-        attributes: ["role"], // Only fetch the role
+        where: { user_id, workspace_id },
+        attributes: ["role"],
       });
 
       if (!userRole) {
